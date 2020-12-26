@@ -4,7 +4,7 @@
       <div class="modal-container">
         <div class="modal-header">
           <slot name="header">
-            default header
+            <button @click="clearInk">clear canvas</button>
           </slot>
         </div>
 
@@ -21,7 +21,7 @@
 
         <div class="modal-footer">
           <slot name="footer">
-            default footer
+            <button @click="saveInk">save canvas</button>
             <button class="modal-default-button" @click="$emit('close')">
               OK
             </button>
@@ -36,46 +36,62 @@
 export default {
   name: "Modal",
   mounted() {
-    const canvasEl = document.getElementById("drawingCanvas");
-    this.canvasElRect = canvasEl.getBoundingClientRect();
-    canvasEl.width = this.canvasElRect.width;
-    canvasEl.height = this.canvasElRect.height;
+    const canvas = document.getElementById("drawingCanvas");
+    const canvasRect = canvas.getBoundingClientRect();
+    const ctx = canvas.getContext("2d");
 
-    const ctx = canvasEl.getContext("2d");
+    canvas.width = canvasRect.width;
+    canvas.height = canvasRect.height;
+
     ctx.lineCap = "round";
     ctx.strokeStyle = "black";
     ctx.lineWidth = 5;
-    this.vueCanvas = ctx;
+
+    this.canvas = canvas;
+    this.canvasRect = canvasRect;
+    this.canvasCtx = ctx;
   },
   data() {
     return {
-      canvasElRect: null,
-      vueCanvas: null,
-      rectWidth: 200,
+      canvas: null,
+      canvasRect: null,
+      canvasCtx: null,
       isDrawing: false,
+      signature: null,
     };
   },
   methods: {
     startInk(e) {
       const { x, y } = e;
       const [actualX, actualY] = this.getCursorPosition(x, y);
-      this.vueCanvas.beginPath();
-      this.vueCanvas.moveTo(actualX, actualY);
+      this.canvasCtx.beginPath();
+      this.canvasCtx.moveTo(actualX, actualY);
       this.isDrawing = true;
     },
     drawInk(e) {
       if (!this.isDrawing) return;
       const { x, y } = e;
       const [actualX, actualY] = this.getCursorPosition(x, y);
-      this.vueCanvas.lineTo(actualX, actualY);
-      this.vueCanvas.stroke();
+      this.canvasCtx.lineTo(actualX, actualY);
+      this.canvasCtx.stroke();
     },
     endInk() {
-      this.vueCanvas.closePath();
+      this.canvasCtx.closePath();
       this.isDrawing = false;
     },
+    clearInk() {
+      this.canvasCtx.clearRect(
+        0,
+        0,
+        this.canvasRect.width,
+        this.canvasRect.height
+      );
+    },
+    saveInk() {
+      console.log(this.canvas.toDataURL("image/png"));
+    },
     getCursorPosition(x, y) {
-      return [x - this.canvasElRect.left, y - this.canvasElRect.top];
+      return [x - this.canvasRect.left, y - this.canvasRect.top];
     },
   },
 };
