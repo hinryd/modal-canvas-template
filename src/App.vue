@@ -1,28 +1,27 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <ToggleButton :stateToToggle="modalState" @toggleState="toggleModal" />
+    <Modal v-if="modalState" @close="toggleModal(false)" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import ToggleButton from "./components/ToggleButton";
+import Modal from "./components/Modal";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    HelloWorld
-  }
-}
+    ToggleButton,
+    Modal,
+  },
+  data() {
+    return { modalState: false };
+  },
+  methods: {
+    toggleModal: function(e) {
+      this.modalState = e;
+    },
+  },
+};
 </script>
-
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
