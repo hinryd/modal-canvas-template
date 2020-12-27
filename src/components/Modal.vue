@@ -3,25 +3,15 @@
     <div class="modal-wrapper">
       <div class="modal-container">
         <div class="modal-header">
-          <slot name="header">
-            <button @click="clearInk">clear canvas</button>
-          </slot>
+          <slot name="header"> </slot>
         </div>
 
         <div class="modal-body">
-          <canvas
-            id="drawingCanvas"
-            v-on="{
-              mousedown: startInk,
-              mouseup: endInk,
-              mousemove: drawInk,
-            }"
-          />
+          <Canvas />
         </div>
 
         <div class="modal-footer">
           <slot name="footer">
-            <button @click="saveInk">save canvas</button>
             <button class="modal-default-button" @click="$emit('close')">
               OK
             </button>
@@ -33,79 +23,17 @@
 </template>
 
 <script>
+import Canvas from "./Canvas";
+
 export default {
   name: "Modal",
-  mounted() {
-    const canvas = document.getElementById("drawingCanvas");
-    const canvasRect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = canvasRect.width;
-    canvas.height = canvasRect.height;
-
-    ctx.lineCap = "round";
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 5;
-
-    this.canvas = canvas;
-    this.canvasRect = canvasRect;
-    this.canvasCtx = ctx;
-  },
-  data() {
-    return {
-      canvas: null,
-      canvasRect: null,
-      canvasCtx: null,
-      isDrawing: false,
-      signature: null,
-    };
-  },
-  methods: {
-    startInk(e) {
-      const { x, y } = e;
-      const [actualX, actualY] = this.getCursorPosition(x, y);
-      this.canvasCtx.beginPath();
-      this.canvasCtx.moveTo(actualX, actualY);
-      this.isDrawing = true;
-    },
-    drawInk(e) {
-      if (!this.isDrawing) return;
-      const { x, y } = e;
-      const [actualX, actualY] = this.getCursorPosition(x, y);
-      this.canvasCtx.lineTo(actualX, actualY);
-      this.canvasCtx.stroke();
-    },
-    endInk() {
-      this.canvasCtx.closePath();
-      this.isDrawing = false;
-    },
-    clearInk() {
-      this.canvasCtx.clearRect(
-        0,
-        0,
-        this.canvasRect.width,
-        this.canvasRect.height
-      );
-    },
-    saveInk() {
-      console.log(this.canvas.toDataURL("image/png"));
-    },
-    getCursorPosition(x, y) {
-      return [x - this.canvasRect.left, y - this.canvasRect.top];
-    },
+  components: {
+    Canvas,
   },
 };
 </script>
 
 <style scoped>
-#drawingCanvas {
-  width: 100%;
-  height: 100%;
-  border-width: 2px;
-  border-color: black;
-  border-style: solid;
-}
-
 .modal-mask {
   position: fixed;
   z-index: 9998;
